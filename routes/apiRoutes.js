@@ -43,27 +43,27 @@ router.get("/trash", async (req, res) => {
   res.json(req.body);
 });
 
-// //Update user data
-// router.patch("/users", getToken, authenticateToken, async (req, res) => {
-//   if (req.email != req.body.email) {
-//     res.status(401).json({ error: "Unauthorized" });
-//     return;
-//   }
-//   const user = await User.findOne({ email: req.email });
-//   const answer = {
-//     email: req.email,
-//     nickname: req.nickname,
-//     cell: req.query.cell,
-//     power: req.query.power,
-//     tokens: req.query.tokens,
-//     trash: req.query.trash,
-//   };
+//Update user data
+router.post("/users", getToken, authenticateToken, async (req, res) => {
+  if (req.email != req.body.email) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const user = await User.findOne({ email: req.email });
+  const answer = {
+    email: req.email,
+    nickname: req.nickname,
+    cell: req.query.cell,
+    power: req.query.power,
+    tokens: req.query.tokens,
+    trash: req.query.trash,
+  };
 
-//   res.json(answer);
-// });
+  res.json(answer);
+});
 
 // Increase user tokens
-router.post("/tokens", async (req, res) => {
+router.post("/tokens", getToken, authenticateToken, async (req, res) => {
   try {
     var user = await User.findOne({ email: req.email });
     if (!user) {
@@ -80,7 +80,7 @@ router.post("/tokens", async (req, res) => {
 });
 
 // Increase user power
-router.post("/power", async (req, res) => {
+router.post("/power", getToken, authenticateToken, async (req, res) => {
   try {
     var user = await User.findOne({ email: req.email });
     if (!user) {
@@ -97,7 +97,7 @@ router.post("/power", async (req, res) => {
 });
 
 // Increase user trash
-router.post("/trash", async (req, res) => {
+router.post("/trash", getToken, authenticateToken, async (req, res) => {
   try {
     var user = await User.findOne({ email: req.email });
     if (!user) {

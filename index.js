@@ -9,6 +9,9 @@ const uri = process.env["MONGO_URI"];
 const { auth } = require("express-openid-connect");
 require('dotenv').config()
 
+// Import schemas
+const Leadboard = require("./schemas/Leadboard.model");
+
 const app = express();
 
 const port = 3000;
@@ -17,7 +20,7 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: process.env["AUTH0_SECRET"],
-  baseURL: 'https://jubilant-yodel-5gv579q6q5g9fvrxq-3000.app.github.dev',
+  baseURL: 'https://verbose-happiness-q7v65xqrqg5qc47jj-3000.app.github.dev',
   clientID: process.env["AUTH0_CLIENTID"],
   issuerBaseURL: 'https://dev-1tui2vdlhhsdtl30.us.auth0.com'
 };
@@ -43,14 +46,7 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" })); // Parse URL-en
 
 
 app.use("/", authRoutes);  
-
-app.use(auth(config)); // Use auth middleware with config
-
-// req.isAuthenticated is provided from the auth router
-app.get('/', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
-});
-
+app.use("/api", apiRoutes);
 
 app.use(express.json());
 
@@ -59,32 +55,15 @@ app.get('/' , (req, res) => {
 })
 
 
+async function start() {
+  await mongoose.connect(process.env["MONGO_URI"]);
+  await mongoose.connection.db.admin().command({ ping: 1 });
+  console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  console.log("Db connected")
 
-const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-async function run() {
-  try {
-    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
-    await mongoose.connect(uri, clientOptions);
-    await mongoose.connection.db.admin().command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    await mongoose.disconnect();
-  }
-}
-run().catch(console.dir);
-
-
-// Connect to the database and start the server
-mongoose
-  .connect(process.env["MONGO_URI"]) // Connect to MongoDB
-  .then(() => {
-    console.log("Connected to db");
-
-    app.listen(process.env["PORT"], () => {
-      console.log("Server started on port " + process.env["PORT"]); // Start server
-    });
-  })
-  .catch((err) => {
-    console.error("Error connecting to db:", err);
-    return;
+  app.listen(process.env["PORT"], () => {
+    console.log("Server started on port " + process.env["PORT"]); // Start server
   });
+}
+
+start();

@@ -1,7 +1,6 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
-const VerificationCode = require("../schemas/VerificationCode.model");
 const User = require("../schemas/User.model");
 const jwt = require("jsonwebtoken");
 
@@ -17,64 +16,77 @@ const {
   sendVerificationCode,
 } = require("../utils/authUtils");
 
-router.post("/callback", async (req, res) => {
-    const user = jwt.verify(req.body.id_token, process.env["AUTH0_SECRET"], { algorithms: ['HS256'] })
+router.post("/signin", async (req, res) => {
+    const { email, password } = req.body;
 
-    if (!user) {
-        res.redirect("/login");
-    }
-
-    const { email } = user;
-
-    let alreadyUser;
-
-    try {
-        alreadyUser = await User.findOne({ email });
-    } catch (err) {
-        res.status(500).send("An error occured")
+    if (!email || !password) {
+        res.status(400).send("Please fill in all fields");
         return;
     }
 
-    if (alreadyUser) {
-        alreadyUser = await User.findOne({ email });
-
-        const accessToken = generateAccessToken({ email });
-
-        res.cookie("authToken", accessToken, { httpOnly: True, maxAge: 3600000 });
-        res.redirect("/");
-    } else {
-        let userCheck;
-
-        try {
-            userCheckIfExist = await User.findOne({
-                email,
-            });
-        } catch (err) {
-            console.error("Error finding user with email to check if email exists: " + err);
-            res.redirect("/signup?err=Internal server error, please try again");
-            return;
-        }
-
-        if (userCheckIfExist) {
-            res.redirect("/signup?err=Email already exists");
-            return;
-        }
-
-        const newUser = new User({
-            firstName: user.nickname,
-            lastName: user.nickname,
-            email: user.email,
-            cell: "none",
-            power: 0,
-            tokens: 0
-        });
-
-        newUser.save().catch((err) => {
-            console.error("Error creating user: " + err);
-            res.redirect("/signup?err=Internal server error, please try again");
-            return;
-        })
+    let user;
+    try {
+        user = await User.findOne({ email });
+    } catch (err) {
+        console.error("Error finding user with email: " + err);
+        res.status(500).send("Internal server error, please try again");
+        return;
     }
+
+    if (!user) {
+        res.status(401).send("Invalid email or password");
+        return;
+    }
+
+    const validPassword = await comparePassword(password, user.email);
+
+    if (!validPassword) {
+        res.status(401).send("Invalid email or password");
+        return;
+    }
+
+    const accessToken = generateAccessToken({ email });
+    res.json(accessToken);
+});
+
+router.post('/signup', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        res.redirect("/signup?err=Please fill in all fields");
+        return;
+    }
+
+    let userCheckIfExist;
+    try {
+        userCheckIfExist = await User.findOne({
+            email,
+        });
+    } catch (err) {
+        console.error("Error finding user with email to check if email exists: " + err);
+        res.status(500).send("Internal server error, please try again");
+        return;
+    }
+
+    if (userCheckIfExist) {
+        res.redirect("/signup?err=Email already exists");
+        return;
+    }
+
+    const newUser = new User({
+        email,
+        password: hashPassword(password),
+        nickname: email
+    });
+
+    newUser.save().catch((err) => {
+        console.error("Error creating user: " + err);
+        res.status(500).send("Internal server error, please try again");
+        return;
+    })
+
+    const accessToken = generateAccessToken({ email });
+    res.json(accessToken);
 })
 
 module.exports = router;

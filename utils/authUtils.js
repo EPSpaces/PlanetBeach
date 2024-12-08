@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const User = require("../schemas/User.model");
 
 // Middleware to verify the token sent and set req.email to the user's email
@@ -23,7 +22,7 @@ function authenticateToken(req, res, next) {
 
 // Middleware to move the token from the cookie jar to the request header
 function getToken(req, res, next) {
-  const token = req.cookies && req.cookies["authToken"];
+  const token = req.body.token;
 
   if (token) {
     req.headers["Authorization"] = `Bearer ${token}`;

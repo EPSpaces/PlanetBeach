@@ -1,6 +1,9 @@
 const Anthropic = require("@anthropic-ai/sdk");
 const multer = require("multer");
 const path = require('path');
+const fs = require('fs');
+
+const router = require("express").Router();
 
 const upload = multer({ dest: "uploads/" });
 
@@ -12,7 +15,7 @@ const anthropic = new Anthropic({
 
 router.post("/ai/trash", upload.single("image"), async (req, res) => {
   try {
-    const imagePath = path.join(__dirname, req.file.path)
+    const imagePath = path.join(__dirname, "..", req.file.path);
     const imageBuffer = fs.readFileSync(imagePath);
     const imageBase64 = imageBuffer.toString("base64");
 
@@ -45,7 +48,7 @@ router.post("/ai/trash", upload.single("image"), async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   } finally {
-    fs.unlikeSync(req.file.path);
+    fs.unlinkSync(req.file.path);
   }
 });
 

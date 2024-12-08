@@ -7,7 +7,7 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers && req.headers["Authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
-    return res.redirect("/signin");
+    return res.status(401).json({ error: "No token provided!" });
   }
 
   jwt.verify(token, process.env["TOKEN_SECRET"], (err, user) => {
@@ -18,6 +18,15 @@ function authenticateToken(req, res, next) {
     req.email = user.email;
     next();
   });
+}
+
+function checkIfTokenIsValid(token) {
+  try {
+    jwt.verify(token, process.env["TOKEN_SECRET"]);
+    return true;
+  } catch (err) {
+    return false
+  }
 }
 
 // Middleware to move the token from the cookie jar to the request header
@@ -143,4 +152,5 @@ module.exports = {
   comparePasswordHash,
   sendVerificationCode,
   decodeAuth0,
+  checkIfTokenIsValid,
 };

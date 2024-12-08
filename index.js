@@ -35,6 +35,7 @@ ensureNoToken,
 // Import Routes
 const authRoutes = require("./routes/authRoutes");
 const apiRoutes = require("./routes/apiRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.set("trust proxy", true); // Trust the first proxy
@@ -47,6 +48,7 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" })); // Parse URL-en
 
 app.use("/", authRoutes);  
 app.use("/api", apiRoutes);
+app.use('/', aiRoutes);
 
 app.use(express.json());
 

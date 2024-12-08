@@ -14,6 +14,7 @@ const {
   hashPassword,
   generateAccessToken,
   sendVerificationCode,
+    checkIfTokenIsValid,
 } = require("../utils/authUtils");
 
 router.post("/signin", async (req, res) => {
@@ -46,7 +47,7 @@ router.post("/signin", async (req, res) => {
     }
 
     const accessToken = generateAccessToken({ email });
-    res.json(accessToken);
+    res.json({accessToken: accessToken});
 });
 
 router.post('/signup', async (req, res) => {
@@ -86,7 +87,15 @@ router.post('/signup', async (req, res) => {
     })
 
     const accessToken = generateAccessToken({ email });
-    res.json(accessToken);
+    res.json({accessToken: accessToken});
 })
+
+router.post('/validate', (req, res) => {
+    valid = checkIfTokenIsValid(req.body.accessToken);
+    console.log(valid);
+    // Make valid a string
+    valid = valid.toString();
+    res.json({isValid: valid});
+});
 
 module.exports = router;

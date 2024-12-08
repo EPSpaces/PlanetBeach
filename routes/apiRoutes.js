@@ -12,8 +12,8 @@ const router = express.Router();
 //Get user data
 router.get("/users", getToken, authenticateToken, async (req, res) => {
   if (req.email != req.body.email) {
-     res.status(401).json({ error: "Unauthorized" });
-     return;
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
   const user = await User.find({ email: req.query.email });
   console.log(user);
@@ -21,7 +21,7 @@ router.get("/users", getToken, authenticateToken, async (req, res) => {
 });
 
 //Get sum of all user trash
-router.get("/trash", getToken, authenticateToken, async (req, res) => {
+router.get("/trash", async (req, res) => {
   // Get all users
   const users = await User.find({});
   // For each user get the total power and sum
@@ -34,23 +34,83 @@ router.get("/trash", getToken, authenticateToken, async (req, res) => {
     };
   });
 
-  // Sort the leaderboard by power
-  leaderboard.sort((a, b) => b.power - a.power);
-
-  // Return the leaderboard
-  res.json(leaderboard);
+  //sum all the trash and return that
+  let totalTrash = 0;
+  leaderboard.forEach((user) => {
+    totalTrash += user.trash;
+  });
+  req.body.trash = totalTrash;
+  res.json(req.body);
 });
 
-//Update user data
-router.put("/users", getToken, authenticateToken, async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
-  user.email = req.body.email;
-  user.cell = req.body.cell;
-  user.power = req.body.power;
-  user.tokens = req.body.tokens;
-  user.trash = req.body.trash;
-  user.save();
-  res.json(user);
+// //Update user data
+// router.patch("/users", getToken, authenticateToken, async (req, res) => {
+//   if (req.email != req.body.email) {
+//     res.status(401).json({ error: "Unauthorized" });
+//     return;
+//   }
+//   const user = await User.findOne({ email: req.email });
+//   const answer = {
+//     email: req.email,
+//     nickname: req.nickname,
+//     cell: req.query.cell,
+//     power: req.query.power,
+//     tokens: req.query.tokens,
+//     trash: req.query.trash,
+//   };
+
+//   res.json(answer);
+// });
+
+// Increase user tokens
+router.post("/tokens", async (req, res) => {
+  try {
+    var user = await User.findOne({ email: req.email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    user.tokens = req.tokens;
+    await user.save();
+    console.log(user);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Increase user power
+router.post("/power", async (req, res) => {
+  try {
+    var user = await User.findOne({ email: req.email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    user.power = req.query.power;
+    await user.save();
+    console.log(user);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Increase user trash
+router.post("/trash", async (req, res) => {
+  try {
+    var user = await User.findOne({ email: req.email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    user.trash = req.query.trash;
+    await user.save();
+    console.log(user);
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.get("/world", async (req, res) => {
@@ -67,10 +127,10 @@ router.get("/world", async (req, res) => {
   });
 
   // Sort the leaderboard by power
-  leaderboard.sort((a, b) => b.power - a.power);
+  leaderboard.sort((a, b) => b.trash - a.trash);
 
   // Return the leaderboard
   res.json(leaderboard);
-})
+});
 
 module.exports = router;

@@ -1,7 +1,9 @@
 const Anthropic = require("@anthropic-ai/sdk");
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
 const fs = require('fs');
+
 
 const router = require("express").Router();
 
@@ -42,7 +44,7 @@ function extractNumber(input) {
   return null;
 }
 
-router.post("/ai/trash", async (req, res) => {
+router.post("/ai/trash", express.json({ limit: '1gb' }), async (req, res) => {
   try {
     console.log(req.body.image);
     res.send("Hello");

@@ -44,22 +44,19 @@ router.get("/trash", async (req, res) => {
 });
 
 //Update user data
-router.post("/users", getToken, authenticateToken, async (req, res) => {
-  if (req.email != req.body.email) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
+router.post("/reward", async (req, res) => {
+  console.log(req.query.email);
+  const user = await User.findOne({ email: req.query.email });
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
   }
-  const user = await User.findOne({ email: req.email });
-  const answer = {
-    email: req.email,
-    nickname: req.nickname,
-    cell: req.query.cell,
-    power: req.query.power,
-    tokens: req.query.tokens,
-    trash: req.query.trash,
-  };
+  user.tokens = req.body.reward;
+  user.power = req.body.reward;
+  user.trash = req.body.reward / 5;
 
-  res.json(answer);
+  await user.save();
+  console.log(user);
+  res.json(user);
 });
 
 // Increase user tokens

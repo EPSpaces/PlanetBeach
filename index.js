@@ -42,7 +42,8 @@ app.set("trust proxy", true); // Trust the first proxy
 app.use(express.json()); // Parse JSON requests
 app.use(express.static(__dirname + "/public")); // Serve static files
 app.use(cookieParser()); // Parse cookies
-app.use(express.json({ limit: "100mb" })); // Set JSON body limit to 100mb
+app.use(express.json({ limit: '50gb' }));
+app.use(express.urlencoded({ limit: '50gb', extended: true }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" })); // Parse URL-encoded bodies with limit
 
 

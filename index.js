@@ -27,9 +27,9 @@ const config = {
 
 // Import Util Functions
 const {
-authenticateToken,
-getToken,
-ensureNoToken,
+  authenticateToken,
+  getToken,
+  ensureNoToken,
 } = require("./utils/authUtils");
 
 // Import Routes
@@ -47,14 +47,14 @@ app.use(express.urlencoded({ limit: '1gb', extended: true }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" })); // Parse URL-encoded bodies with limit
 
 
-app.use("/", authRoutes);  
+app.use("/", authRoutes);
 app.use("/api", apiRoutes);
 app.use('/', aiRoutes);
 
 app.use(express.json());
 
-app.get('/' , (req, res) => {
-    res.send("hello");
+app.get('/', (req, res) => {
+  res.send("hello");
 })
 
 

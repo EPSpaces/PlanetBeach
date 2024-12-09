@@ -1,6 +1,6 @@
 AUTH0_SECRET=
 AUTH0_CLIENTID=
-MONGO_URI=
+MONGO_URI=mongodb+srv://db-user:321@planetbeach.iixgn.mongodb.net/?retryWrites=true&w=majority&appName=PlanetBeach
 ANTHROPIC_API_KEY=
 PORT=
 TOKEN_SECRET=

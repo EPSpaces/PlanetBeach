@@ -45,8 +45,7 @@ router.get("/trash", async (req, res) => {
 
 //Update user data
 router.post("/reward", async (req, res) => {
-  console.log(req.query.email);
-  const user = await User.findOne({ email: req.query.email });
+  const user = await User.findOne({ email: req.email });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }

@@ -45,13 +45,14 @@ router.get("/trash", async (req, res) => {
 
 //Update user data
 router.post("/reward", async (req, res) => {
-  const user = await User.findOne({ email: req.email });
+  /*const user = await User.findOne({ email: req.email });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
-  }
-  user.tokens = req.body.reward;
-  user.power = req.body.reward;
-  user.trash = req.body.reward / 5;
+  }*/
+  const user = await User.findOne({ email: req.query.email });
+  user.tokens += req.query.reward;
+  user.power += user.tokens;
+  user.trash += user.tokens / 5;
 
   await user.save();
   console.log(user);

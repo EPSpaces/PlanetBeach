@@ -1,4 +1,3 @@
-// Init Rest API
 const express = require("express");
 const axios = require("axios").default;
 const fs = require("fs");
@@ -9,7 +8,6 @@ const uri = process.env["MONGO_URI"];
 const { auth } = require("express-openid-connect");
 require('dotenv').config()
 
-// Import schemas
 const Leadboard = require("./schemas/Leadboard.model");
 
 const app = express();
@@ -25,38 +23,29 @@ const config = {
   issuerBaseURL: 'https://dev-1tui2vdlhhsdtl30.us.auth0.com'
 };
 
-// Import Util Functions
 const {
 authenticateToken,
 getToken,
 ensureNoToken,
 } = require("./utils/authUtils");
 
-// Import Routes
 const authRoutes = require("./routes/authRoutes");
 const apiRoutes = require("./routes/apiRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 
-// auth router attaches /login, /logout, and /callback routes to the baseURL
-app.set("trust proxy", true); // Trust the first proxy
-app.use(express.json()); // Parse JSON requests
-app.use(express.static(__dirname + "/public")); // Serve static files
-app.use(cookieParser()); // Parse cookies
+app.set("trust proxy", true);
 app.use(express.json({ limit: '1gb' }));
-app.use(express.urlencoded({ limit: '1gb', extended: true }));
-app.use(express.urlencoded({ extended: true, limit: "100mb" })); // Parse URL-encoded bodies with limit
-
+app.use(express.static(__dirname + "/public"));
+app.use(cookieParser());
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.use("/", authRoutes);  
 app.use("/api", apiRoutes);
 app.use('/', aiRoutes);
 
-app.use(express.json());
-
 app.get('/' , (req, res) => {
     res.send("hello");
 })
-
 
 async function start() {
   await mongoose.connect(process.env["MONGO_URI"]);
@@ -65,7 +54,7 @@ async function start() {
   console.log("Db connected")
 
   app.listen(process.env["PORT"], () => {
-    console.log("Server started on port " + process.env["PORT"]); // Start server
+    console.log("Server started on port " + process.env["PORT"]);
   });
 }
 
